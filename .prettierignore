@@ -1,0 +1,13 @@
+node_modules/**
+src/assets/**
+package-lock.json
+storybook-static/**
+.husky/**
+.idea/**
+dist/**
+deployment/**
+src/services/**
+!.prettierrc.js
+!.storybook/main.js
+!.storybook/preview.js
+env.d.ts

@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@plugin "daisyui" ;
+@plugin "daisyui/theme" {
+    name: "light";
+    default: true;
+    --color-primary: #6725F1;
+    --color-gray-50: #61616180;
+    --color-gray-400: #616161;
+    --color-base-300: #889DC6;
+    --color-black: #212121;
+    --color-gray: #F4F3FA;
+    --color-blue-50: #017DF2;
+    --color-blue-100: #1976D2;
+    --color-white: #FFFFFF;
+    --color-red-900: #D00000;
+    --color-error: #FE196D;
+    --color-accent: #2AD7B3;
+    --color-blue-700: #0052CC;
+    --color-orange-100: #FFFAF9;
+    --color-warning: #F4A827;
+    --color-orange-200: #FF8C42;
+    --color-orange-300: #FF8A00;
+    --color-orange-500: #FF8C42;
+    --color-gray-100: #F7F7F7;
+    --color-gray-200: #6161610D;
+    --color-green-100: #1F8A701A;
+    --color-red-100: #D000001A;
+    --color-yellow-50: #FF8C421A;
+    --color-yellow-200: #FF8C42;
+    --color-yellow-100: #EFEFBB;
+    --color-gray-300: #D4D3DD;
+    --color-zinc-500:#6B7280;
+}
+@theme {
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+    --font-roboto: "Roboto", sans-serif;
+    --font-poppins: "Poppins", sans-serif;
+}
+
+@font-face {
+    font-family: roboto;
+    src: url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap") format("truetype");
+    font-display: fallback;
+}
+@font-face {
+    font-family: poppins;
+    src: url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap") format("truetype");
+    font-display: fallback;
+}
+
+:root {
+    --dashboard-background: #F8FAFC;
+    --dashboard-primary: #1E40AF;
+    --dashboard-primary-hover: #1D4ED8;
+    --dashboard-primary-soft: #DBEAFE;
+    --dashboard-success: #16A34A;
+    --dashboard-success-soft: #DCFCE7;
+    --dashboard-error: #DC2626;
+    --dashboard-error-soft: #FEE2E2;
+    --dashboard-warning: #F97316;
+    --dashboard-warning-soft: #FFEDD5;
+    --dashboard-surface: #FFFFFF;
+    --dashboard-sidebar: #0F172A;
+    --dashboard-heading: #0F172A;
+    --dashboard-muted: #64748B;
+    --dashboard-border: #CBD5E1;
+    --dashboard-soft-border: #E2E8F0;
+    --dashboard-table-header: #F8FAFC;
+    --dashboard-overlay: rgb(15 23 42 / 0.45);
+
+    --bprogress-color: var(--dashboard-primary);
+    --bprogress-height: 4px;
+    --bprogress-z-index: 99999;
+    --app-dark: var(--dashboard-heading);
+    --app-gray: #94A3B8;
+    --app-primary: var(--dashboard-primary);
+    --app-white: var(--dashboard-surface);
+    --app-border: var(--dashboard-border);
+    --app-background: var(--dashboard-background);
+    --app-danger: var(--dashboard-error);
+    --app-soft-border: var(--dashboard-soft-border);
+    --app-blue-gray: #475569;
+    --app-primary-dark: var(--dashboard-primary-hover);
+    --app-muted: var(--dashboard-muted);
+    --app-success: var(--dashboard-success);
+    --app-warning: var(--dashboard-warning);
+    --app-sidebar: var(--dashboard-sidebar);
+}
+
+@layer utilities {
+  .bg-login-page {
+    background-color: #ECEFFD;
+  }
+
+  .bg-login-field {
+    background-color: var(--color-white);
+  }
+
+  .bg-dashboard-page {
+    background-color: var(--dashboard-background);
+  }
+
+  .bg-dashboard-card {
+    background-color: var(--dashboard-surface);
+  }
+
+  .bg-dashboard-table-header {
+    background-color: var(--dashboard-table-header);
+  }
+
+  .text-dashboard-heading {
+    color: var(--dashboard-heading);
+  }
+
+  .text-dashboard-muted {
+    color: var(--dashboard-muted);
+  }
+
+  .border-dashboard {
+    border-color: var(--dashboard-soft-border);
+  }
+
+  .bprogress {
+    @apply pointer-events-none;
+  }
+
+  .bprogress .bar {
+    @apply fixed top-0 left-0 w-full h-[var(--bprogress-height)] z-[var(--bprogress-z-index)];
+    background: var(--bprogress-color);
+  }
+
+  .bprogress .peg {
+    @apply block absolute right-0 w-[100px] h-full rotate-[3deg] translate-y-[-4px];
+    box-shadow: 0 0 14px var(--bprogress-color), 0 0 6px var(--bprogress-color);
+    opacity: 1;
+  }
+}

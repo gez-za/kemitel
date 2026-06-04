@@ -1,0 +1,16 @@
+{
+  "en": {
+    "civility": {
+      "mister_lbl": "Mr.",
+      "madam_lbl": "Mm.",
+      "miss_lbl": "Ms."
+    }
+  },
+  "fr": {
+    "civility": {
+      "mister_lbl": "Mr.",
+      "madam_lbl": "Mme.",
+      "miss_lbl": "Ms."
+    }
+  }
+}
