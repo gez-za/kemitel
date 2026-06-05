@@ -1,18 +1,20 @@
 import { defineStore } from "pinia";
-import type { ApiError } from "@/utils/types.ts";
+import { ref } from "vue";
 
-type State = { genericError?: ApiError };
+export const useErrorStore = defineStore("error", () => {
+  const error = ref<string | null>(null);
 
-export const useErrorStore = defineStore("error", {
-  state: (): State => ({
-    genericError: undefined,
-  }),
-  actions: {
-    setGenericError(error: ApiError): void {
-      this.genericError = error;
-    },
-    clearGenericError(): void {
-      this.genericError = undefined;
-    },
-  },
+  function setError(message: string | null) {
+    error.value = message;
+  }
+
+  function clearError() {
+    error.value = null;
+  }
+
+  return {
+    error,
+    setError,
+    clearError
+  };
 });

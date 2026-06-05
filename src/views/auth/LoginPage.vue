@@ -5,7 +5,9 @@ import { useI18n } from "vue-i18n";
 import ButtonWrapper from "@/components/ButtonWrapper.vue";
 import BaseImage from "@/components/BaseImage.vue";
 import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.store";
+import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 
 const { t } = useI18n({
   useScope: "global",
@@ -15,7 +17,7 @@ const { t } = useI18n({
       title: "Login",
       description: "Welcome to Kemitel",
       forget_password: "Forgot your password?",
-      username: "Username",
+      username: "Email",
       password: "Password",
       submit_btn_lbl: "Sign In",
       sign_up_prompt: "Don't have an account?",
@@ -27,7 +29,7 @@ const { t } = useI18n({
       title: "Connexion",
       description: "Bienvenue sur Kemitel",
       forget_password: "Mot de passe oublié ?",
-      username: "Nom d'utilisateur",
+      username: "Email",
       password: "Mot de passe",
       submit_btn_lbl: "Connexion",
       sign_up_prompt: "Vous n'avez pas de compte ?",
@@ -39,114 +41,135 @@ const { t } = useI18n({
 });
 
 const route = useRoute();
-const missingUsername = ref(false);
-const missingPassword = ref(false);
-const loginFailed = computed(() => !!route.query.error);
+const router = useRouter();
+const authStore = useAuthStore();
 
-const hasMissingFields = computed(
-  () => missingUsername.value || missingPassword.value,
-);
-const errorMessage = computed(() =>
-  loginFailed.value ? t("login_failed") : t("required_fields"),
-);
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
+
+const loginFailed = computed(() => !!error.value);
+
 const usernameInputClass = computed(() =>
-  missingUsername.value || loginFailed.value
-    ? "bg-login-field !border-red-900"
-    : "bg-login-field",
+  loginFailed.value ? "!border-red-500" : "border-gray-200",
 );
 const passwordInputClass = computed(() =>
-  missingPassword.value || loginFailed.value
-    ? "bg-login-field !border-red-900"
-    : "bg-login-field",
+  loginFailed.value ? "!border-red-500" : "border-gray-200",
 );
 
-const formAction = `${import.meta.env.VITE_OAUTH2_URL}/login?tenant-id=${import.meta.env.VITE_TENANT}`;
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    error.value = t("required_fields");
+    return;
+  }
+
+  loading.value = true;
+  error.value = "";
+  try {
+    await authStore.login(email.value, password.value);
+    router.push("/");
+  } catch (e: any) {
+    console.error(e);
+    error.value = t("login_failed");
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full max-w-md mx-auto p-6">
     <section
-      class="mb-6 flex w-full flex-col items-center justify-center gap-y-2"
+      class="mb-10 flex w-full flex-col items-center justify-center gap-y-4"
     >
       <div class="flex w-full justify-center">
         <BaseImage
           name="loginImag"
           path="image"
-          class="h-28 w-28 object-contain sm:h-[150px] sm:w-[150px]"
+          class="h-24 w-24 object-contain sm:h-32 sm:w-32"
         />
       </div>
-      <h1
-        data-testid="title"
-        class="font-roboto-semiBold w-full text-center text-2xl font-semibold text-black sm:text-3xl"
-      >
-        {{ t("title") }}
-      </h1>
-      <span class="block w-full text-center text-base font-normal text-black">
-        {{ t("description") }}
-      </span>
-    </section>
-
-    <form
-      autocomplete="off"
-      data-testid="login-form"
-      class="flex w-full flex-col gap-4"
-      method="post"
-      :action="formAction"
-    >
-      <div
-        v-if="loginFailed || hasMissingFields"
-        class="text-red-900"
-        role="alert"
-      >
-        <p data-test="error-login-message" class="text-sm">
-          {{ errorMessage }}
+      <div class="text-center">
+        <h1
+          data-testid="title"
+          class="font-roboto-semiBold text-2xl font-bold text-gray-900 sm:text-3xl"
+        >
+          {{ t("title") }}
+        </h1>
+        <p class="mt-2 text-gray-500">
+          {{ t("description") }}
         </p>
       </div>
-      <div class="flex flex-col gap-4">
+    </section>
+
+    <div class="flex w-full flex-col gap-6">
+      <div
+        v-if="error"
+        class="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 flex items-center gap-2"
+        role="alert"
+      >
+        <ExclamationTriangleIcon class="h-5 w-5 shrink-0" />
+        <p data-test="error-login-message" class="text-sm font-medium">
+          {{ error }}
+        </p>
+      </div>
+      
+      <div class="flex flex-col gap-5">
         <TextInput
-          id="username"
-          name="username"
+          id="email"
+          name="email"
+          v-model="email"
           :placeholder="t('username')"
           :required="true"
-          autocomplete="username"
+          autocomplete="email"
           :input-class="usernameInputClass"
-          :label-has-background="false"
+          :label-has-background="true"
         />
         <PasswordInput
           id="password"
           name="password"
+          v-model="password"
           :placeholder="t('password')"
           :required="true"
           autocomplete="current-password"
           :input-class="passwordInputClass"
-          :label-has-background="false"
+          :label-has-background="true"
         />
       </div>
-      <router-link
-        to="/forgot-password"
-        class="font-poppins-regular inline-block text-right text-sm font-normal text-blue-100 underline"
-        data-testid="forgot-password-link"
-      >
-        {{ t("forget_password") }}
-      </router-link>
+
+      <div class="flex items-center justify-end">
+        <router-link
+          to="/forgot-password"
+          class="text-sm font-medium text-blue-600 hover:text-blue-500"
+          data-testid="forgot-password-link"
+        >
+          {{ t("forget_password") }}
+        </router-link>
+      </div>
+
       <ButtonWrapper
-        type="submit"
+        @click="handleLogin"
+        :loading="loading"
         data-testid="submit-button"
-        class="font-poppins-medium my-4 h-12 w-full cursor-pointer rounded-full bg-blue-700 px-6 py-2 text-base font-medium text-white hover:bg-blue-700/70 sm:text-lg"
+        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
       >
         {{ t("submit_btn_lbl") }}
       </ButtonWrapper>
-      <p class="text-center text-sm text-black">
-        {{ t("sign_up_prompt") }}
-        <button
-          type="button"
-          class="cursor-default font-medium text-blue-700 underline"
-          data-testid="signup-link"
-        >
-          {{ t("sign_up_link") }}
-        </button>
-      </p>
-    </form>
+
+      <div class="text-center">
+        <p class="text-sm text-gray-600">
+          {{ t("sign_up_prompt") }}
+          <button
+            type="button"
+            class="ml-1 font-semibold text-blue-600 hover:text-blue-500 underline"
+            data-testid="signup-link"
+          >
+            {{ t("sign_up_link") }}
+          </button>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 

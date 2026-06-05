@@ -1,0 +1,46 @@
+/* Force white text on blue backgrounds globally for Kemitel */
+
+.bg-blue-600, 
+.bg-blue-700,
+.bg-blue-800,
+.bg-blue-900,
+.from-blue-600,
+.bg-gradient-to-br.from-blue-600 {
+  color: #ffffff !important;
+}
+
+.bg-blue-600 *, 
+.bg-blue-700 *,
+.bg-blue-800 *,
+.bg-blue-900 *,
+.from-blue-600 *,
+.bg-gradient-to-br.from-blue-600 * {
+  color: #ffffff !important;
+}
+
+/* Specific overrides for opacity/subtle text on blue */
+.bg-blue-600 .text-blue-100,
+.from-blue-600 .text-blue-100,
+.from-blue-600 .text-blue-50 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Icon colors on blue */
+.bg-blue-600 svg,
+.from-blue-600 svg,
+.bg-blue-600 i,
+.from-blue-600 i {
+  color: #ffffff !important;
+}
+
+/* Active and Hover states for blue buttons */
+button.bg-blue-600:hover,
+button.bg-blue-600:active {
+  background-color: #1d4ed8 !important; /* blue-700 */
+  color: #ffffff !important;
+}
+
+button.bg-blue-600:hover *,
+button.bg-blue-600:active * {
+  color: #ffffff !important;
+}

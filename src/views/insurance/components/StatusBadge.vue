@@ -1,30 +1,46 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from "vue";
+
+const props = defineProps<{
   status: string;
 }>();
 
-const getClass = (status: string) => {
-  if (status === "Active" || status === "Contacted" || status === "Sent") {
-    return "bg-[var(--dashboard-success-soft)] text-[var(--dashboard-success)] border-[var(--dashboard-success-soft)]";
+const statusConfig = computed(() => {
+  const s = (props.status || "Unknown").toLowerCase();
+  
+  if (["active", "approved", "validee", "contacted", "sent", "completed", "success"].includes(s)) {
+    return {
+      label: props.status,
+      classes: "bg-green-50 text-green-700 border-green-200"
+    };
   }
 
-  if (status === "Expired" || status === "No Answer" || status === "Failed") {
-    return "bg-[var(--dashboard-error-soft)] text-[var(--dashboard-error)] border-[var(--dashboard-error-soft)]";
+  if (["expired", "rejected", "rejetee", "no answer", "failed", "offline"].includes(s)) {
+    return {
+      label: props.status,
+      classes: "bg-red-50 text-red-700 border-red-200"
+    };
   }
 
-  if (status === "Renewal Necessary") {
-    return "bg-[var(--dashboard-warning-soft)] text-[var(--dashboard-warning)] border-[var(--dashboard-warning-soft)]";
+  if (["pending", "en_attente", "renewal necessary", "en attente", "waiting"].includes(s)) {
+    return {
+      label: props.status,
+      classes: "bg-yellow-50 text-yellow-700 border-yellow-200"
+    };
   }
 
-  return "bg-[var(--dashboard-background)] text-[var(--dashboard-muted)] border-[var(--dashboard-soft-border)]";
-};
+  return {
+    label: props.status,
+    classes: "bg-gray-50 text-gray-700 border-gray-200"
+  };
+});
 </script>
 
 <template>
   <span
-    :class="getClass(status)"
-    class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold"
+    :class="statusConfig.classes"
+    class="inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
   >
-    {{ status }}
+    {{ statusConfig.label }}
   </span>
 </template>

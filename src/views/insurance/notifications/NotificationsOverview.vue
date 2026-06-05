@@ -1,144 +1,72 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { notifications } from "../data/mockInsurance";
-import StatusBadge from "../components/StatusBadge.vue";
+import { computed, onMounted } from "vue";
+import { useAuthStore } from "@/stores/auth.store";
+import { useInsuranceStore } from "@/stores/insurance.store";
 
-const smsSentToday = computed(
-  () =>
-    notifications.filter(
-      (notification) =>
-        notification.channel === "SMS" && notification.status === "Sent",
-    ).length,
-);
-const pushSentToday = computed(
-  () =>
-    notifications.filter(
-      (notification) =>
-        notification.channel === "Push" && notification.status === "Sent",
-    ).length,
-);
-const failedSms = computed(
-  () =>
-    notifications.filter(
-      (notification) =>
-        notification.channel === "SMS" && notification.status === "Failed",
-    ).length,
-);
-const failedPush = computed(
-  () =>
-    notifications.filter(
-      (notification) =>
-        notification.channel === "Push" && notification.status === "Failed",
-    ).length,
-);
+const authStore = useAuthStore();
+const insuranceStore = useInsuranceStore();
 
-const metrics = computed(() => [
-  { label: "SMS sent today", value: smsSentToday.value, tone: "success" },
-  {
-    label: "Push notifications sent today",
-    value: pushSentToday.value,
-    tone: "success",
-  },
-  { label: "Failed SMS", value: failedSms.value, tone: "danger" },
-  {
-    label: "Failed push notifications",
-    value: failedPush.value,
-    tone: "danger",
-  },
-  { label: "Last batch execution", value: "08:00 AM", tone: "primary" },
-  { label: "Next batch execution", value: "02:00 PM", tone: "warning" },
-]);
+onMounted(async () => {
+  if (authStore.isClient) {
+    await insuranceStore.fetchUserNotifications();
+  }
+});
 
-const getMetricClass = (tone: string) => {
-  if (tone === "success") {
-    return "text-[var(--dashboard-success)] bg-[var(--dashboard-success-soft)]";
-  }
-  if (tone === "danger") {
-    return "text-[var(--dashboard-error)] bg-[var(--dashboard-error-soft)]";
-  }
-  if (tone === "warning") {
-    return "text-[var(--dashboard-warning)] bg-[var(--dashboard-warning-soft)]";
-  }
-  return "text-[var(--dashboard-primary)] bg-[var(--dashboard-primary-soft)]";
+const notifications = computed(() => insuranceStore.notifications);
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleString();
 };
 </script>
 
 <template>
-  <section class="space-y-6">
+  <section class="space-y-6 animate-in fade-in duration-500">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-[var(--app-dark)] sm:text-3xl">
-        Notifications Admin
-      </h1>
-      <p class="mt-1 text-sm text-[var(--app-muted)]">
-        Monitor automated SMS and push notification batches.
+      <h1 class="text-3xl font-extrabold text-gray-900">Notifications</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Stay updated with your insurance status and claims.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <div
-        v-for="metric in metrics"
-        :key="metric.label"
-        class="rounded-xl border border-[var(--dashboard-soft-border)] bg-[var(--dashboard-surface)] p-5 shadow-sm"
+    <div v-if="notifications.length > 0" class="space-y-4">
+      <div 
+        v-for="note in notifications" 
+        :key="note.id"
+        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-start gap-4"
+        :class="{ 'border-l-4 border-l-blue-500': note.status === 'Unread' }"
       >
-        <p class="text-sm font-semibold text-[var(--app-muted)]">
-          {{ metric.label }}
-        </p>
-        <p
-          class="mt-4 inline-flex rounded-lg px-3 py-2 text-2xl font-bold"
-          :class="getMetricClass(metric.tone)"
-        >
-          {{ metric.value }}
-        </p>
+        <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div class="flex-1">
+          <p class="text-gray-900 font-medium">{{ note.message }}</p>
+          <p class="text-xs text-gray-400 mt-1">{{ formatDate(note.date) }}</p>
+        </div>
+        <div v-if="note.status === 'Unread'" class="h-2 w-2 rounded-full bg-blue-600"></div>
       </div>
     </div>
 
     <div
-      class="overflow-x-auto rounded-xl border border-[var(--dashboard-soft-border)] bg-[var(--dashboard-surface)] shadow-sm"
+      v-else
+      class="rounded-2xl border border-gray-100 bg-white p-16 text-center shadow-sm"
     >
-      <table class="min-w-[760px] w-full text-left text-sm">
-        <thead class="bg-[var(--dashboard-table-header)] text-[var(--dashboard-muted)]">
-          <tr>
-            <th class="px-5 py-4">Customer</th>
-            <th class="px-5 py-4">Channel</th>
-            <th class="px-5 py-4">Phone</th>
-            <th class="px-5 py-4">Expiration</th>
-            <th class="px-5 py-4">Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr
-            v-for="notification in notifications"
-            :key="notification.id"
-            class="border-t border-[var(--app-soft-border)]"
-          >
-            <td class="px-5 py-4 font-medium text-[var(--app-dark)]">
-              {{ notification.customerName }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ notification.channel }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ notification.phone }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ notification.expirationDate }}
-            </td>
-            <td class="px-5 py-4">
-              <StatusBadge :status="notification.status" />
-            </td>
-          </tr>
-
-          <tr v-if="notifications.length === 0">
-            <td
-              colspan="5"
-              class="px-5 py-10 text-center text-[var(--app-muted)]"
-            >
-              No notification found
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="mx-auto h-20 w-20 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 text-3xl mb-4">
+        <i class="fas fa-bell-slash"></i>
+      </div>
+      <h2 class="text-xl font-bold text-gray-900">No notifications</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        You're all caught up! We'll notify you here when something happens.
+      </p>
     </div>
   </section>
 </template>
+
+<style scoped>
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+</style>

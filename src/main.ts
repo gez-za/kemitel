@@ -6,11 +6,11 @@ import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 import App from "@/App.vue";
 import "./index.css";
+import "@/assets/contrast-fix.css"; // Force high-contrast text on blue
 import { SnackbarService } from "vue3-snackbar";
 import "vue3-snackbar/styles";
-import { VueQueryPlugin } from "@tanstack/vue-query";
-import { prepareApis } from "@/utils/api";
 import { initGlobalNavigationGuard } from "@/router/route-guards";
+import { setupAdminUser } from "@/utils/setup-admin";
 import { BProgress } from "@bprogress/core";
 import { locale } from "@/utils/language";
 import dayjs from "dayjs";
@@ -65,7 +65,6 @@ dayjs.updateLocale("fr", {
   },
 });
 
-prepareApis();
 
 const i18n = createI18n({
   legacy: false,
@@ -82,7 +81,6 @@ createApp(App)
   .use(createPinia())
   .use(router)
   .use(SnackbarService)
-  .use(VueQueryPlugin)
   .mount("#app");
 
 localStorage.setItem("tenant-id", import.meta.env.VITE_TENANT);
@@ -98,3 +96,5 @@ router.afterEach(() => {
 });
 
 initGlobalNavigationGuard(router);
+
+setupAdminUser().catch(console.error);

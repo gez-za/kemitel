@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from "vue-router";
+import { computed } from "vue";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { menuItems } from "@/utils/menu";
-import { logout } from "@/utils/oauth2";
+import { useAuthStore } from "@/stores/auth.store";
 import { XMarkIcon } from "@heroicons/vue/24/outline";
 
 defineProps<{
@@ -13,8 +14,26 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-const navigationItems = menuItems.filter((item) => item.path);
-const actionItems = menuItems.filter((item) => item.action);
+const router = useRouter();
+const authStore = useAuthStore();
+
+const navigationItems = computed(() => 
+  menuItems.filter((item) => 
+    item.path && 
+    (!item.roles || (authStore.profile?.role && item.roles.includes(authStore.profile.role as any)))
+  )
+);
+const actionItems = computed(() => 
+  menuItems.filter((item) => 
+    item.action && 
+    (!item.roles || (authStore.profile?.role && item.roles.includes(authStore.profile.role as any)))
+  )
+);
+
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push("/login");
+};
 
 const isActive = (path?: string) => {
   if (!path) return false;
@@ -44,7 +63,7 @@ const isActive = (path?: string) => {
       <div>
         <h1 class="text-lg font-bold tracking-tight lg:text-xl">SmartCover</h1>
         <p class="mt-1 text-xs text-[rgb(255_255_255_/_0.6)] lg:text-sm">
-          Hotline Agent Console
+          {{ authStore.isAgent ? 'Hotline Agent Console' : 'Customer Portal' }}
         </p>
       </div>
 
@@ -85,7 +104,7 @@ const isActive = (path?: string) => {
         :key="item.label"
         class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold text-[rgb(255_255_255_/_0.7)] transition hover:bg-[rgb(255_255_255_/_0.1)] hover:text-[var(--dashboard-surface)]"
         type="button"
-        @click="logout"
+        @click="handleLogout"
       >
         <component :is="item.icon" class="h-5 w-5" />
         <span>{{ item.label }}</span>

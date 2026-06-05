@@ -18,7 +18,7 @@ export interface InputProps {
   labelHasBackground?: boolean;
 }
 
-const props = withDefaults(defineProps<InputProps>(), {
+const props = withDefaults(defineProps<InputProps & { modelValue?: string }>(), {
   type: "text",
   disabled: false,
   required: false,
@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<InputProps>(), {
   labelHasBackground: true,
 });
 
-const emit = defineEmits(["blur"]);
+const emit = defineEmits(["blur", "update:modelValue"]);
 
 const isFocused = ref(false);
 
@@ -40,10 +40,14 @@ const {
   handleChange,
   handleBlur,
   errorMessage,
-} = useField<string>(() => props.name);
+} = useField<string>(() => props.name, undefined, {
+  initialValue: props.modelValue,
+});
 
 const onChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
   handleChange(event, false);
+  emit("update:modelValue", target.value);
 };
 
 const onBlur = (event: Event) => {

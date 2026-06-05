@@ -29,13 +29,13 @@ const snackbar = useSnackbar();
 const errorStore = useErrorStore();
 
 watch(
-  () => errorStore.genericError,
+  () => errorStore.error,
   (value) => {
     if (value) {
       snackbar.add({
         type: "error",
-        title: `${value.statusCode}`,
-        text: t(`${value.message}`),
+        title: "Error",
+        text: value,
       });
     }
   }
@@ -52,7 +52,7 @@ watch(
       groups
       border="bottom"
       :duration="5000"
-      @cleared="errorStore.clearGenericError"
+      @cleared="errorStore.clearError"
     >
       <template #message-content="{ message }">
         <div class="flex flex-col w-full h-5 md:h-10">

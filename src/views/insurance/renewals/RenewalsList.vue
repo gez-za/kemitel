@@ -1,189 +1,91 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { customers } from "../data/mockInsurance";
+import { computed, onMounted } from "vue";
+import { useInsuranceStore } from "@/stores/insurance.store";
 import StatusBadge from "../components/StatusBadge.vue";
+import { useAuthStore } from "@/stores/auth.store";
+import { formatDate, maskInsuranceNumber } from "@/utils/date";
 
-const filters = ["All", "Renewal Necessary", "Expired", "Contacted", "No Answer"];
-const activeFilter = ref("All");
-const showContactLogModal = ref(false);
-const selectedCustomerName = ref("");
-const contactStatus = ref("Contacted Successfully");
-const contactComment = ref("");
+const insuranceStore = useInsuranceStore();
+const authStore = useAuthStore();
 
-const getDaysRemaining = (expirationDate: string) => {
-  const today = new Date();
-  const expiration = new Date(`${expirationDate}T00:00:00`);
-  const diff = expiration.getTime() - today.getTime();
-
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-};
-
-const filteredCustomers = computed(() => {
-  if (activeFilter.value === "All") return customers;
-  if (activeFilter.value === "Contacted") {
-    return customers.filter((customer) => customer.lastContactStatus === "Contacted");
+onMounted(async () => {
+  if (authStore.isAgent) {
+    await insuranceStore.fetchAllInsurances();
+  } else {
+    await insuranceStore.fetchUserInsurances();
   }
-  if (activeFilter.value === "No Answer") {
-    return customers.filter((customer) => customer.lastContactStatus === "No Answer");
-  }
-
-  return customers.filter(
-    (customer) => customer.insuranceStatus === activeFilter.value,
-  );
 });
 
-const openContactLog = (customerName: string) => {
-  selectedCustomerName.value = customerName;
-  contactStatus.value = "Contacted Successfully";
-  contactComment.value = "";
-  showContactLogModal.value = true;
-};
-
-const saveContactLog = () => {
-  showContactLogModal.value = false;
-};
+const items = computed(() => {
+  if (authStore.isAgent) {
+    return insuranceStore.insurances.filter(ins => ins.status === "Renewal Necessary");
+  }
+  return insuranceStore.insurances;
+});
 </script>
 
 <template>
-  <section class="space-y-6">
+  <section class="space-y-6 animate-in fade-in duration-500">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-[var(--app-dark)] sm:text-3xl">
-        Renewal Management
+      <h1 class="text-3xl font-extrabold text-gray-900">
+        {{ authStore.isAgent ? 'Renewals Management' : 'My Insurances' }}
       </h1>
-      <p class="mt-1 text-sm text-[var(--app-muted)]">
-        Track expiring policies and log hotline outcomes.
+      <p class="mt-1 text-sm text-gray-500">
+        {{ authStore.isAgent ? 'Customers with insurance policies requiring immediate renewal.' : 'Overview of all your current and past insurance policies.' }}
       </p>
     </div>
 
-    <div class="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
-      <button
-        v-for="filter in filters"
-        :key="filter"
-        class="shrink-0 rounded-lg border px-4 py-2 text-sm font-bold transition"
-        :class="
-          activeFilter === filter
-            ? 'border-[var(--dashboard-primary)] bg-[var(--dashboard-primary)] text-[var(--dashboard-surface)]'
-            : 'border-[var(--dashboard-soft-border)] bg-[var(--dashboard-surface)] text-[var(--dashboard-muted)] hover:border-[var(--dashboard-primary)] hover:text-[var(--dashboard-primary)]'
-        "
-        type="button"
-        @click="activeFilter = filter"
-      >
-        {{ filter }}
-      </button>
-    </div>
-
-    <div
-      class="overflow-x-auto rounded-xl border border-[var(--dashboard-soft-border)] bg-[var(--dashboard-surface)] shadow-sm"
-    >
-      <table class="min-w-[920px] w-full text-left text-sm">
-        <thead class="bg-[var(--dashboard-table-header)] text-[var(--dashboard-muted)]">
-          <tr>
-            <th class="px-5 py-4">Customer</th>
-            <th class="px-5 py-4">Phone</th>
-            <th class="px-5 py-4">Expiration date</th>
-            <th class="px-5 py-4">Days remaining</th>
-            <th class="px-5 py-4">Status</th>
-            <th class="px-5 py-4">Last contact</th>
-            <th class="px-5 py-4">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr
-            v-for="customer in filteredCustomers"
-            :key="customer.id"
-            class="border-t border-[var(--app-soft-border)]"
-          >
-            <td class="px-5 py-4 font-semibold text-[var(--app-dark)]">
-              {{ customer.firstName }} {{ customer.lastName }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ customer.phone }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ customer.expirationDate }}
-            </td>
-            <td class="px-5 py-4 text-[var(--app-muted)]">
-              {{ getDaysRemaining(customer.expirationDate) }}
-            </td>
-            <td class="px-5 py-4">
-              <StatusBadge :status="customer.insuranceStatus" />
-            </td>
-            <td class="px-5 py-4">
-              <StatusBadge :status="customer.lastContactStatus" />
-            </td>
-            <td class="px-5 py-4">
-              <button
-                class="rounded-lg bg-[var(--dashboard-primary)] px-3 py-2 text-xs font-bold text-[var(--dashboard-surface)] hover:bg-[var(--dashboard-primary-hover)]"
-                type="button"
-                @click="
-                  openContactLog(`${customer.firstName} ${customer.lastName}`)
-                "
-              >
-                Log contact
-              </button>
-            </td>
-          </tr>
-
-          <tr v-if="filteredCustomers.length === 0">
-            <td
-              colspan="7"
-              class="px-5 py-10 text-center text-[var(--app-muted)]"
-            >
-              No customer matches this filter
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div
-      v-if="showContactLogModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--dashboard-overlay)]"
-    >
-      <div class="mx-4 w-full max-w-lg rounded-xl bg-[var(--dashboard-surface)] p-5 shadow-xl sm:p-6">
-        <h2 class="text-lg font-bold text-[var(--app-dark)]">Contact Log</h2>
-        <p class="mt-1 text-sm text-[var(--app-muted)]">
-          {{ selectedCustomerName }}
-        </p>
-
-        <label class="mt-5 block text-sm font-semibold text-[var(--app-dark)]">
-          Status
-        </label>
-        <select
-          v-model="contactStatus"
-          class="mt-2 w-full rounded-lg border border-[var(--dashboard-border)] px-4 py-3 text-sm outline-none focus:border-[var(--dashboard-primary)]"
-        >
-          <option>Contacted Successfully</option>
-          <option>No Answer</option>
-        </select>
-
-        <label class="mt-5 block text-sm font-semibold text-[var(--app-dark)]">
-          Comment
-        </label>
-        <textarea
-          v-model="contactComment"
-          class="mt-2 min-h-28 w-full rounded-lg border border-[var(--dashboard-border)] px-4 py-3 text-sm outline-none focus:border-[var(--dashboard-primary)]"
-          placeholder="Add call notes"
-        />
-
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            class="rounded-lg border border-[var(--app-border)] px-4 py-2 text-sm font-semibold"
-            type="button"
-            @click="showContactLogModal = false"
-          >
-            Cancel
-          </button>
-          <button
-            class="rounded-lg bg-[var(--dashboard-primary)] px-4 py-2 text-sm font-bold text-[var(--dashboard-surface)]"
-            type="button"
-            @click="saveContactLog"
-          >
-            Save
-          </button>
-        </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+          <thead class="bg-gray-50 text-gray-500 font-medium uppercase tracking-wider">
+            <tr>
+              <th class="px-6 py-4">Policy Number</th>
+              <th v-if="authStore.isAgent" class="px-6 py-4">Client ID</th>
+              <th class="px-6 py-4">Effective Date</th>
+              <th class="px-6 py-4">Expiry Date</th>
+              <th class="px-6 py-4 text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white text-gray-600">
+            <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">
+                {{ maskInsuranceNumber(item.insuranceNumber) }}
+              </td>
+              <td v-if="authStore.isAgent" class="px-6 py-4 text-xs font-mono">
+                {{ item.userId }}
+              </td>
+              <td class="px-6 py-4">
+                {{ formatDate(item.registrationDate) }}
+              </td>
+              <td class="px-6 py-4">
+                {{ formatDate(item.expirationDate) }}
+              </td>
+              <td class="px-6 py-4 text-right">
+                <StatusBadge :status="item.status" />
+              </td>
+            </tr>
+            <tr v-if="items.length === 0">
+              <td colspan="5" class="px-6 py-16 text-center text-gray-500 italic">
+                <div class="flex flex-col items-center">
+                  <i class="fas fa-shield-slash text-4xl mb-4 text-gray-200"></i>
+                  <p>{{ authStore.isAgent ? 'No renewals pending at this time.' : 'No insurance records found.' }}</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+</style>

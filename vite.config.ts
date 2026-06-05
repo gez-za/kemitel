@@ -86,43 +86,8 @@ export const baseConfig = {
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        navigateFallbackDenylist: [
-          /^\/oauth2\//,
-          /^\/login\/oauth2\//,
-          /^\/rest\/login\/oauth2\//,
-          /^\/rest\/oauth2\//,
-          /^\/cookie\//,
-          /^\/logout/,
-          /^\/userinfo/
-        ],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url, request }) =>
-              request.mode === "navigate" &&
-              (url.pathname.startsWith("/oauth2/") ||
-                url.pathname.startsWith("/login/oauth2/") ||
-                url.pathname.startsWith("/rest/login/oauth2/") ||
-                url.pathname.startsWith("/rest/oauth2/") ||
-                url.pathname.startsWith("/cookie/") ||
-                url.pathname.startsWith("/logout") ||
-                url.pathname.startsWith("/userinfo")),
-            handler: "NetworkOnly"
-          },
-          {
-            urlPattern: ({ url }) => url.pathname.startsWith("/rest/api/"),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+        navigateFallbackDenylist: [],
+        runtimeCaching: []
       }
     })
   ],

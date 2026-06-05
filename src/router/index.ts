@@ -12,47 +12,79 @@ const router = createRouter({
         {
           path: "",
           name: "home",
-          component: () => import("@/views/auth/HomePage.vue"),
+          component: () => import("@/views/insurance/dashboard/DashboardOverview.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
+        },
+        {
+          path: "agents",
+          name: "agent-management",
+          component: () => import("@/views/admin/AgentManagement.vue"),
+          meta: { roles: ['agent_hotline'] } // Assuming senior agents can manage team
         },
         {
           path: "customers",
           name: "insurance-customers",
           component: () =>
             import("@/views/insurance/customers/CustomersList.vue"),
+          meta: { roles: ['agent_hotline'] }
         },
         {
           path: "customers/:customerId",
           name: "insurance-customer-profile",
           component: () =>
             import("@/views/insurance/customers/CustomerProfile.vue"),
+          meta: { roles: ['agent_hotline'] }
         },
         {
           path: "devices",
           name: "insurance-devices",
           component: () => import("@/views/insurance/devices/DevicesList.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
         },
         {
           path: "devices/:deviceId",
           name: "insurance-device-details",
           component: () =>
             import("@/views/insurance/devices/DeviceDetails.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
         },
         {
           path: "renewals",
           name: "insurance-renewals",
           component: () =>
             import("@/views/insurance/renewals/RenewalsList.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
         },
         {
           path: "history",
           name: "insurance-history",
           component: () => import("@/views/insurance/history/HistoryList.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
+        },
+        {
+          path: "declare-loss",
+          name: "insurance-declare-loss",
+          component: () => import("@/views/insurance/history/DeclareLoss.vue"),
+          meta: { roles: ['client'] }
+        },
+        {
+          path: "payments",
+          name: "insurance-payments",
+          component: () => import("@/views/insurance/history/PaymentsList.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
         },
         {
           path: "notifications",
           name: "insurance-notifications",
           component: () =>
             import("@/views/insurance/notifications/NotificationsOverview.vue"),
+          meta: { roles: ['client', 'agent_hotline'] }
+        },
+        {
+          path: "search",
+          name: "insurance-search",
+          component: () => import("@/views/insurance/devices/DevicesList.vue"),
+          meta: { roles: ['client'] }
         },
       ],
     },

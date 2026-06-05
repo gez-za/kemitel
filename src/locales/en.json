@@ -1,5 +1,41 @@
 {
-  "menu": {
-    "title": "Menu"
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot Password?",
+    "sign_in": "Sign In"
+  },
+  "insurance": {
+    "title": "Smartphone Insurance",
+    "subscribe": "Subscribe New Phone",
+    "imei": "IMEI",
+    "brand": "Brand",
+    "model": "Model",
+    "value": "Device Value",
+    "payment_method": "Payment Method",
+    "status": "Status",
+    "active": "Active",
+    "expired": "Expired",
+    "renewal_needed": "Renewal Necessary",
+    "declare_loss": "Declare Loss / Theft",
+    "history": "Claims History"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "total_policies": "Total Policies",
+    "active_policies": "Active Policies",
+    "expired_policies": "Expired Policies",
+    "renewals_needed": "Renewals Needed"
   }
 }
