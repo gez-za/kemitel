@@ -83,7 +83,7 @@ const openCustomer = (id: string) => {
       >
         <div class="flex items-start justify-between mb-4">
           <div class="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-lg">
-            {{ customer.displayName?.charAt(0) || 'U' }}
+            {{ customer.firstname?.charAt(0) }}
           </div>
           <div class="flex flex-col items-end gap-1">
              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Joined</span>
@@ -93,7 +93,7 @@ const openCustomer = (id: string) => {
 
         <div>
           <h2 class="text-lg font-black text-gray-900 group-hover:text-blue-600 transition-colors">
-            {{ customer.displayName || 'Unnamed User' }}
+            {{ customer.firstname }}
           </h2>
           <p class="text-sm text-gray-500 font-medium">{{ customer.email }}</p>
           <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">{{ customer.phoneNumber || 'No phone provided' }}</p>

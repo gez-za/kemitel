@@ -71,7 +71,7 @@ const toggleInsuranceStatus = async () => {
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
         <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-          {{ customer.displayName || 'Unnamed Customer' }}
+          {{ customer.firstname }}
         </h1>
         <p class="mt-1 text-sm text-gray-500 font-medium uppercase tracking-widest">Customer Profile & History</p>
       </div>
@@ -90,7 +90,7 @@ const toggleInsuranceStatus = async () => {
       <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
         <div class="flex items-center gap-4 mb-6">
           <div class="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl font-black">
-            {{ (customer.displayName || 'U').charAt(0) }}
+            {{ (customer.firstname || 'U').charAt(0) }}
           </div>
           <h2 class="text-xl font-black text-gray-900">Personal Info</h2>
         </div>
